@@ -1,24 +1,23 @@
-# This is a summary of all the code for this tutorial
-from coinbase.rest import RESTClient
-from json import dumps
-import math
+import requests
+import http
+import os
 
-api_key = "organizations/{org_id}/apiKeys/{key_id}"
-api_secret = "-----BEGIN EC PRIVATE KEY-----\nYOUR PRIVATE KEY\n-----END EC PRIVATE KEY-----\n"
-
-client = RESTClient(api_key=api_key, api_secret=api_secret)
-
-product = client.get_product("BTC-USD")
-btc_usd_price = float(product["price"])
-adjusted_btc_usd_price = str(math.floor(btc_usd_price - (btc_usd_price * 0.05)))
-
-limit_order = client.limit_order_gtc_buy(
-    client_order_id="00000002",
-    product_id="BTC-USD",
-    base_size="0.0002",
-    limit_price=adjusted_btc_usd_price
-)
-
-limit_order_id = limit_order["order_id"]
-
-client.cancel_orders(order_ids=[limit_order_id])
+api_key = "5740b0812c744b519ae63746240105"
+cities = ["Chennai", "Mumbai", "Bangalore", "Hyderabad", "Kolkata", "Cochin"]
+f = open("data.json", "a")
+f.write("[")
+d = len(cities)
+for city in cities:
+    d -= 1
+    res = requests.get(
+        f"http://api.weatherapi.com/v1/current.json?key={api_key}&q={city}&aqi=yes"
+    )
+    # print(res.headers['content-type'])
+    # print(res.json())
+    if d > 0:
+        f.writelines(f"{res.text},\n")
+    else:
+        f.writelines(f"{res.text}")
+    print("Writing json completed")
+f.write("]")
+f.close()
